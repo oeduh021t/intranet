@@ -23,7 +23,33 @@ app.get('/api/status', (req, res) => {
   res.json({ status: 'Online', sistema: 'Intranet Maternidade' });
 });
 
-// Rota Principal: Busca Avançada de Ramais
+// ROTA: Autenticação de Usuário (Login)
+app.post('/api/login', async (req, res) => {
+  try {
+    const { login, senha } = req.body;
+
+    if (!login || !senha) {
+      return res.status(400).json({ error: 'Usuário e senha são obrigatórios.' });
+    }
+
+    // Busca o usuário no banco
+    const sql = 'SELECT id, nome, login, grupo FROM intranet_usuarios WHERE login = ? AND senha = ?';
+    const [rows] = await pool.query(sql, [login, senha]);
+
+    if (rows.length === 0) {
+      return res.status(401).json({ error: 'Usuário ou senha incorretos.' });
+    }
+
+    // Retorna os dados do usuário (menos a senha por segurança)
+    res.json(rows[0]);
+
+  } catch (error) {
+    console.error('Erro ao fazer login:', error);
+    res.status(500).json({ error: 'Erro interno no servidor.' });
+  }
+});
+
+// Rota : Busca Avançada de Ramais
 app.get('/api/ramais', async (req, res) => {
   try {
     const { busca } = req.query;
