@@ -1,0 +1,26 @@
+services:
+  intranet_backend:
+    image: node:20-alpine
+    container_name: intranet_backend
+    working_dir: /app
+    volumes:
+      - ./backend:/app
+    ports:
+      - "3001:3000"
+    environment:
+      - PORT=3000
+    # Altera o script do package.json para usar o nodemon
+    command: sh -c "npm pkg set scripts.dev='nodemon index.js' && touch index.js && npm run dev"
+    restart: always
+
+  intranet_frontend:
+    image: node:20-alpine
+    container_name: intranet_frontend
+    working_dir: /app
+    volumes:
+      - ./frontend:/app
+    ports:
+      - "5174:5173"
+    # Altera o Vite para aceitar conexões externas na rede do hospital (--host)
+    command: sh -c "npm pkg set scripts.dev='vite --host' && npm run dev"
+    restart: always
